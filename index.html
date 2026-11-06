@@ -98,7 +98,7 @@
   .who-name { font-size: 0.9rem; color: var(--muted); }
 
   .avatar {
-    width: 2.6rem; height: 2.6rem;
+    width: 3.6rem; height: 3.6rem;
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
@@ -184,6 +184,33 @@
   .list { margin-top: 0.6rem; }
 
   .card { padding: 2.1rem 0; border-bottom: 1px solid var(--rule); }
+
+  /* a card with a cover: small picture on the left, text on the right */
+  .card.has-cover {
+    display: grid;
+    grid-template-columns: 5.2rem minmax(0, 1fr);
+    gap: 1.4rem;
+    align-items: start;
+  }
+
+  .cover {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 3px;
+    background: var(--shell);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .card .cover-link { margin-top: 0.45rem; }
+
+  .post-head.has-cover {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: 1.8rem;
+    align-items: start;
+  }
 
   .card-meta, .post-meta { font-size: 0.85rem; color: var(--muted); }
   .card-meta .dot, .post-meta .dot { margin: 0 0.45rem; opacity: 0.6; }
@@ -321,6 +348,8 @@
     .site-title { font-size: 1.25rem; }
     .post h1 { font-size: 1.6rem; }
     .note { font-size: 1.02rem; }
+    .card.has-cover { grid-template-columns: 4.2rem minmax(0, 1fr); gap: 1rem; }
+    .post-head.has-cover { grid-template-columns: 6.5rem minmax(0, 1fr); gap: 1.1rem; }
     .neighbours { grid-template-columns: 1fr; }
     .neighbours .next { grid-column: 1; }
   }
@@ -581,12 +610,46 @@
     return m[3] + p(m[2]) + p(m[1]) + '-' + p(m[4]) + m[5] + m[6];
   }
 
+  /* ---------- book covers ----------
+     Add a column titled "Cover" anywhere in the sheet. In it, put any of:
+       - a link to an image          https://…/cover.jpg
+       - a Google Drive share link   https://drive.google.com/file/d/<id>/view
+                                     (the file must be shared "Anyone with the link")
+       - a file name                 sphinx.jpg  -> loads covers/sphinx.jpg from this repo
+     Leave it empty for no picture. */
+  function coverUrl(raw) {
+    const v = (raw || '').trim();
+    if (!v) return '';
+    const drive = v.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=)([\w-]{10,})/);
+    if (drive) return 'https://drive.google.com/thumbnail?id=' + drive[1] + '&sz=w600';
+    if (/^https?:\/\//i.test(v)) return v;
+    if (/^[\w.\- ]+\.(jpe?g|png|webp|gif|avif)$/i.test(v)) return 'covers/' + encodeURIComponent(v);
+    return '';
+  }
+
+  function coverImg(b, cls = 'cover') {
+    // hide the picture (and its space) if the link turns out to be broken
+    const src = b.cover.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    // some sites send a 1×1 blank instead of an error, so treat tiny images as missing too
+    return `<img class="${cls}" src="${src}" alt="" loading="lazy" referrerpolicy="no-referrer"`
+      + ` onerror="dropCover(this)" onload="if (this.naturalWidth < 20) dropCover(this)">`;
+  }
+
+  function dropCover(img) {
+    const box = img.closest('.has-cover');
+    if (box) box.classList.remove('has-cover');
+    (img.closest('.cover-link') || img).remove();
+  }
+
   /* ---------- load ---------- */
   async function loadData() {
     try {
       const res = await fetch(CSV_URL);
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      const rows = parseCSV(await res.text()).slice(1);
+      const all = parseCSV(await res.text());
+      const header = (all[0] || []).map(h => h.trim().toLowerCase());
+      const colCover = header.findIndex(h => h === 'cover' || h === 'မျက်နှာဖုံး');
+      const rows = all.slice(1);
 
       const seen = new Set();
       allBooks = rows.map((r, rowIndex) => {
@@ -606,6 +669,7 @@
           origBook:   (r[COL_ORIG_BOOK] || '').trim(),
           origWriter: (r[COL_ORIG_WRITER] || '').trim(),
           comment:    (r[COL_COMMENT] || '').trim(),
+          cover:      colCover >= 0 ? coverUrl(r[colCover]) : '',
           mi:   dt ? dt.mi : -1,
           day:  dt ? (dt.day || 0) : 0,
           year: dt ? dt.year : 0
@@ -728,13 +792,15 @@
     listEl.innerHTML = page.map(b => {
       const href = '#/' + encodeURIComponent(b.slug);
       const when = whenText(b);
-      return '<article class="card">'
-        + (when ? `<div class="card-meta">${txt(when)}</div>` : '')
-        + `<h2><a href="${href}">${txt(b.book)}</a></h2>`
-        + (b.writer ? `<p class="writer">${txt(b.writer)}</p>` : '')
-        + (b.comment ? `<p class="excerpt">${txt(excerptOf(b.comment))}</p>` : '')
-        + (b.comment ? `<a class="more" href="${href}">ဆက်ဖတ်ရန် →</a>` : '')
-        + '</article>';
+      return `<article class="card${b.cover ? ' has-cover' : ''}">`
+        + (b.cover ? `<a class="cover-link" href="${href}" tabindex="-1">${coverImg(b)}</a>` : '')
+        + '<div>'
+        +   (when ? `<div class="card-meta">${txt(when)}</div>` : '')
+        +   `<h2><a href="${href}">${txt(b.book)}</a></h2>`
+        +   (b.writer ? `<p class="writer">${txt(b.writer)}</p>` : '')
+        +   (b.comment ? `<p class="excerpt">${txt(excerptOf(b.comment))}</p>` : '')
+        +   (b.comment ? `<a class="more" href="${href}">ဆက်ဖတ်ရန် →</a>` : '')
+        + '</div></article>';
     }).join('');
 
     renderPages(totalPages);
@@ -808,9 +874,14 @@
       : '';
 
     postEl.innerHTML =
-        (when ? `<div class="post-meta">${txt(when)}</div>` : '')
-      + `<h1>${txt(b.book)}</h1>`
-      + (b.writer ? `<p class="writer">${txt(b.writer)}</p>` : '')
+        `<div class="post-head${b.cover ? ' has-cover' : ''}">`
+      +   (b.cover ? coverImg(b) : '')
+      +   '<div>'
+      +     (when ? `<div class="post-meta">${txt(when)}</div>` : '')
+      +     `<h1>${txt(b.book)}</h1>`
+      +     (b.writer ? `<p class="writer">${txt(b.writer)}</p>` : '')
+      +   '</div>'
+      + '</div>'
       + (meta.length
           ? '<div class="meta">' + meta.map(([l, v]) =>
               `<div><b>${txt(l)}</b><span>${txt(v)}</span></div>`).join('') + '</div>'
