@@ -644,7 +644,7 @@
   /* ---------- load ---------- */
   async function loadData() {
     try {
-      const res = await fetch(CSV_URL);
+      const res = await fetch(CSV_URL, { cache: 'no-store' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const all = parseCSV(await res.text());
       const header = (all[0] || []).map(h => h.trim().toLowerCase());
