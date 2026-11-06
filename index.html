@@ -271,11 +271,14 @@
   }
 
   .note {
-    margin-top: 1.2rem;
+    margin-top: 1.4rem;
     font-size: 1.07rem;
-    line-height: 2.2;
-    white-space: pre-line;
+    line-height: 2.15;
   }
+
+  /* space between paragraphs: about half a line, so each one reads as a
+     block without the page feeling gappy */
+  .note p + p { margin-top: 1.05em; }
 
   .post-tools {
     display: flex;
@@ -765,6 +768,42 @@
     renderList();
   }
 
+  /* ---------- paragraphs ----------
+     Every line break the writer typed starts a new paragraph. A long block
+     with no breaks is split into paragraphs of a few sentences, at "။" (or
+     ". ! ?" in English), so a review never shows as one wall of text. */
+  const PARA_SPLIT_OVER = 520;   // only split blocks longer than this (characters)
+  const PARA_TARGET     = 330;   // aim for paragraphs about this long
+  const PARA_MIN_LAST   = 140;   // a shorter last piece joins the one before
+
+  function sentencesOf(block) {
+    return block
+      .split(/(?<=။)\s*|(?<=(?<!\b(?:Dr|Mr|Mrs|Ms|St|Prof|U))[.!?])\s+(?=\S)/)
+      .map(s => s.trim())
+      .filter(Boolean);
+  }
+
+  function paragraphsOf(text) {
+    const out = [];
+    for (const raw of text.split(/\n+/)) {
+      const block = raw.replace(/[ \t]+/g, ' ').trim();
+      if (!block) continue;
+      if (block.length <= PARA_SPLIT_OVER) { out.push(block); continue; }
+      const pieces = [];
+      let cur = '';
+      for (const s of sentencesOf(block)) {
+        cur = cur ? cur + ' ' + s : s;
+        if (cur.length >= PARA_TARGET) { pieces.push(cur); cur = ''; }
+      }
+      if (cur) {
+        if (pieces.length && cur.length < PARA_MIN_LAST) pieces[pieces.length - 1] += ' ' + cur;
+        else pieces.push(cur);
+      }
+      out.push(...pieces);
+    }
+    return out;
+  }
+
   /* ---------- home: list ---------- */
   function excerptOf(comment) {
     // first paragraph is enough; CSS trims it to three lines
@@ -888,7 +927,9 @@
           : '')
       + (b.comment
           ? '<div class="note-label">စာအုပ်ဖတ်ပြီးတွေးမိတာ</div>'
-            + `<div class="note">${txt(b.comment)}</div>`
+            + '<div class="note">'
+            +   paragraphsOf(b.comment).map(p => `<p>${txt(p)}</p>`).join('')
+            + '</div>'
           : '')
       + '<div class="post-tools">'
       +   '<button class="link theme-btn"></button>'
