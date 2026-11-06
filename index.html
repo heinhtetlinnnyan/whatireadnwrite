@@ -341,6 +341,26 @@
     text-align: center;
   }
 
+  .credits {
+    max-width: 34rem;
+    margin: 0.6rem auto 0;
+    font-size: 0.72rem;
+    line-height: 1.7;
+    opacity: 0.8;
+  }
+
+  .credits a, .cover-credit a { text-decoration: underline; text-underline-offset: 2px; }
+
+  .cover-fig { margin: 0; }
+
+  .cover-credit {
+    margin-top: 0.45rem;
+    font-size: 0.68rem;
+    line-height: 1.5;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+
   [hidden] { display: none !important; }
 
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
@@ -404,7 +424,10 @@
     <article class="post" id="post"></article>
   </section>
 
-  <footer>ဟိန်းထက် · ဖတ်ဖူးတဲ့ စာအုပ်များ</footer>
+  <footer>
+    ဟိန်းထက် · ဖတ်ဖူးတဲ့ စာအုပ်များ
+    <p class="credits" id="credits"></p>
+  </footer>
 </div>
 
 <script>
@@ -641,7 +664,40 @@
   function dropCover(img) {
     const box = img.closest('.has-cover');
     if (box) box.classList.remove('has-cover');
-    (img.closest('.cover-link') || img).remove();
+    (img.closest('.cover-link') || img.closest('.cover-fig') || img).remove();
+  }
+
+  /* ---------- cover credits ----------
+     The sheet's "Cover source" column says where each picture came from.
+     Named sources get a small credit under the cover; entries like
+     "Found online (source not recorded)" or "My own ebook copy" don't,
+     and are covered by the general note in the footer. */
+  function namedSource(raw) {
+    const v = (raw || '').trim();
+    if (!v || /^found online|^my own|not recorded/i.test(v)) return '';
+    return v;
+  }
+
+  function sourceLink(src) {
+    if (/^open library$/i.test(src)) return 'https://openlibrary.org';
+    if (/^[\w-]+(\.[\w-]+)+$/.test(src)) return 'https://' + src;
+    return '';
+  }
+
+  function creditHtml(src) {
+    const url = sourceLink(src);
+    const name = esc(src);
+    return url ? `<a href="${url}" target="_blank" rel="noopener">${name}</a>` : name;
+  }
+
+  function renderCredits() {
+    const el = document.getElementById('credits');
+    if (!el) return;
+    const named = [...new Set(allBooks.filter(b => b.cover && b.coverSrc).map(b => b.coverSrc))];
+    el.innerHTML = 'Book covers belong to their publishers and artists and are shown here only to '
+      + 'identify the books. Cover images come from '
+      + (named.length ? named.map(creditHtml).join(', ') + ' and other sites' : 'various sites')
+      + ', and from the books themselves.';
   }
 
   /* ---------- load ---------- */
@@ -652,6 +708,7 @@
       const all = parseCSV(await res.text());
       const header = (all[0] || []).map(h => h.trim().toLowerCase());
       const colCover = header.findIndex(h => h === 'cover' || h === 'မျက်နှာဖုံး');
+      const colCoverSrc = header.findIndex(h => h === 'cover source');
       const rows = all.slice(1);
 
       const seen = new Set();
@@ -673,6 +730,7 @@
           origWriter: (r[COL_ORIG_WRITER] || '').trim(),
           comment:    (r[COL_COMMENT] || '').trim(),
           cover:      colCover >= 0 ? coverUrl(r[colCover]) : '',
+          coverSrc:   colCoverSrc >= 0 ? namedSource(r[colCoverSrc]) : '',
           mi:   dt ? dt.mi : -1,
           day:  dt ? (dt.day || 0) : 0,
           year: dt ? dt.year : 0
@@ -695,6 +753,7 @@
       }
 
       renderYears();
+      renderCredits();
       applyFilters(false);
       route();
     } catch (err) {
@@ -914,7 +973,11 @@
 
     postEl.innerHTML =
         `<div class="post-head${b.cover ? ' has-cover' : ''}">`
-      +   (b.cover ? coverImg(b) : '')
+      +   (b.cover
+            ? '<figure class="cover-fig">' + coverImg(b)
+              + (b.coverSrc ? `<figcaption class="cover-credit">Cover: ${creditHtml(b.coverSrc)}</figcaption>` : '')
+              + '</figure>'
+            : '')
       +   '<div>'
       +     (when ? `<div class="post-meta">${txt(when)}</div>` : '')
       +     `<h1>${txt(b.book)}</h1>`
