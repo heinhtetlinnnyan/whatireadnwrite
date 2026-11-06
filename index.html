@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ဖတ်ဖူးတဲ့ စာအုပ်များ</title>
+<meta name="description" content="စာအုပ်ဖတ်ပြီး တွေးမိတာတွေကို ရေးထားတာ — ဟိန်းထက်">
 
 <!-- set theme before paint so the page never flashes the wrong colours -->
 <script>
@@ -37,9 +38,7 @@
     --accent: #55665f;
     --shell:  #e7e3d9;
 
-    --content:    1240px;   /* width of the whole reading area */
-    --col-margin: 8rem;     /* left gutter holding the date */
-    --gap:        2.2rem;
+    --content: 46rem;   /* one comfortable reading column, like a blog */
   }
 
   :root[data-theme='dark'] {
@@ -62,20 +61,21 @@
     font-size: 1rem;
     line-height: 2;
     letter-spacing: 0.005em;
-    padding: 5.6rem 1.9rem 8rem;
+    padding: 4.5rem 1.6rem 8rem;
     -webkit-font-smoothing: antialiased;
     transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   /* Myanmar line breaking: only break where we inserted a zero-width space,
      never in the middle of a syllable cluster. */
-  body,
-  .title, .writer, .meta, .note, .subtitle, h1 {
+  body, h1, h2, p, .note, .meta {
     word-break: keep-all;
     overflow-wrap: break-word;
     line-break: strict;
     hyphens: none;
   }
+
+  a { color: inherit; text-decoration: none; }
 
   .container { max-width: var(--content); margin: 0 auto; }
 
@@ -83,22 +83,22 @@
   header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     gap: 1.6rem;
-    padding-bottom: 1.75rem;
+    padding-bottom: 1.6rem;
     border-bottom: 1px solid var(--rule);
   }
 
-  h1 { font-size: 1.65rem; font-weight: 400; line-height: 1.6; letter-spacing: 0.01em; }
+  .site-title { font-size: 1.45rem; font-weight: 400; line-height: 1.6; letter-spacing: 0.01em; }
+  .site-title a:hover { color: var(--accent); }
 
-  .subtitle { color: var(--muted); font-size: 0.85rem; margin-top: 0.4rem; }
+  .subtitle { color: var(--muted); font-size: 0.85rem; margin-top: 0.2rem; }
 
   .who { display: flex; align-items: center; gap: 0.8rem; flex-shrink: 0; }
-
   .who-name { font-size: 0.9rem; color: var(--muted); }
 
   .avatar {
-    width: 2.9rem; height: 2.9rem;
+    width: 2.6rem; height: 2.6rem;
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
@@ -110,20 +110,7 @@
 
   .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  /* ---------- controls ---------- */
-  .bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 1rem;
-    margin-top: 1.75rem;
-    flex-wrap: wrap;
-  }
-
-  .count { font-size: 0.87rem; color: var(--muted); }
-
-  .actions { display: flex; align-items: baseline; gap: 1.35rem; }
-
+  /* ---------- small text buttons ---------- */
   .link {
     background: none;
     border: none;
@@ -138,24 +125,30 @@
 
   .link:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
+  /* ---------- home: controls ---------- */
+  .bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-top: 1.6rem;
+    flex-wrap: wrap;
+  }
+
+  .count { font-size: 0.87rem; color: var(--muted); }
+  .actions { display: flex; align-items: baseline; gap: 1.35rem; }
+
   .years {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.2rem;
-    margin-top: 1.2rem;
-    padding-bottom: 0.13rem;
+    gap: 0.4rem 1.2rem;
+    margin-top: 1rem;
   }
 
   .year {
-    background: none;
-    border: none;
-    font: inherit;
-    font-size: 0.9rem;
-    color: var(--muted);
-    cursor: pointer;
-    padding: 0.13rem 0;
-    border-bottom: 1px solid transparent;
-    transition: color 0.2s;
+    background: none; border: none; font: inherit; font-size: 0.9rem;
+    color: var(--muted); cursor: pointer; padding: 0.13rem 0;
+    border-bottom: 1px solid transparent; transition: color 0.2s;
   }
 
   .year:hover { color: var(--accent); }
@@ -164,14 +157,13 @@
   .search {
     display: none;
     gap: 1.6rem;
-    margin-top: 1.35rem;
+    margin-top: 1.2rem;
     flex-wrap: wrap;
     align-items: flex-end;
   }
 
   .search.open { display: flex; }
-
-  .field { flex: 1 1 14rem; }
+  .field { flex: 1 1 12rem; }
 
   .field input {
     width: 100%;
@@ -188,38 +180,104 @@
   .field input::placeholder { color: var(--muted); }
   .field input:focus { border-bottom-color: var(--accent); }
 
-  /* ---------- entries ---------- */
-  .list { margin-top: 0.55rem; }
+  /* ---------- home: post list ---------- */
+  .list { margin-top: 0.6rem; }
 
-  .entry {
-    display: grid;
-    grid-template-columns: var(--col-margin) minmax(0, 1fr);
-    gap: var(--gap);
-    padding: 2.3rem 0;
+  .card { padding: 2.1rem 0; border-bottom: 1px solid var(--rule); }
+
+  .card-meta, .post-meta { font-size: 0.85rem; color: var(--muted); }
+  .card-meta .dot, .post-meta .dot { margin: 0 0.45rem; opacity: 0.6; }
+
+  .card h2 { font-size: 1.3rem; font-weight: 400; line-height: 1.7; margin-top: 0.3rem; }
+  .card h2 a { transition: color 0.2s; }
+  .card h2 a:hover { color: var(--accent); }
+
+  .card .writer { font-size: 0.95rem; color: var(--accent); }
+
+  .excerpt {
+    margin-top: 0.7rem;
+    color: var(--ink);
+    opacity: 0.85;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .more {
+    display: inline-block;
+    margin-top: 0.7rem;
+    font-size: 0.87rem;
+    color: var(--accent);
+    border-bottom: 1px solid transparent;
+  }
+
+  .more:hover { border-bottom-color: var(--accent); }
+
+  /* ---------- post page ---------- */
+  .back { display: inline-block; margin-top: 1.6rem; font-size: 0.87rem; color: var(--muted); }
+  .back:hover { color: var(--accent); }
+
+  .post { padding-top: 2.4rem; }
+
+  .post h1 { font-size: 2rem; font-weight: 400; line-height: 1.6; margin-top: 0.4rem; }
+
+  .post .writer { font-size: 1.05rem; color: var(--accent); margin-top: 0.2rem; }
+
+  .meta {
+    margin-top: 1.4rem;
+    padding: 0.9rem 1.1rem;
+    background: var(--shell);
+    border-radius: 6px;
+    font-size: 0.92rem;
+  }
+
+  .meta div { display: flex; gap: 0.7rem; }
+  .meta b { font-weight: 400; color: var(--muted); flex-shrink: 0; }
+
+  .note-label {
+    margin-top: 2.2rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--rule);
   }
 
-  .when { font-size: 0.83rem; color: var(--muted); line-height: 2.1; padding-top: 0.2rem; }
-
-  .title { font-size: 1.22rem; line-height: 1.7; margin-bottom: 0.13rem; font-weight: 400; }
-
-  .writer { font-size: 0.97rem; color: var(--accent); margin-bottom: 0.95rem; }
-
-  .meta { font-size: 0.92rem; color: var(--muted); }
-  .meta div { display: flex; gap: 0.55rem; }
-  .meta b { font-weight: 400; color: var(--muted); flex-shrink: 0; }
-  .meta span { color: var(--ink); }
-
   .note {
     margin-top: 1.2rem;
-    padding-left: 1.2rem;
-    border-left: 1px solid var(--rule);
-    font-size: 1rem;
-    line-height: 2.05;
+    font-size: 1.07rem;
+    line-height: 2.2;
     white-space: pre-line;
   }
 
-  .note-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.27rem; }
+  .post-tools {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1.35rem;
+    margin-top: 2.4rem;
+  }
+
+  .neighbours {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+    margin-top: 1.4rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .neighbours a {
+    display: block;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    transition: border-color 0.2s;
+  }
+
+  .neighbours a:hover { border-color: var(--accent); }
+  .neighbours .next { text-align: right; grid-column: 2; }
+  .neighbours small { display: block; font-size: 0.8rem; color: var(--muted); }
+  .neighbours span { display: block; line-height: 1.7; margin-top: 0.2rem; }
 
   /* ---------- states ---------- */
   .state { padding: 4.3rem 0; color: var(--muted); font-size: 0.95rem; }
@@ -242,18 +300,29 @@
   .page:disabled { opacity: 0.28; cursor: default; }
 
   .dots { color: var(--muted); }
-
   .page-note { margin-top: 0.8rem; text-align: center; font-size: 0.83rem; color: var(--muted); }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  [hidden] { display: none !important; }
 
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
   @media (max-width: 620px) {
-    body { padding: 2.9rem 1.35rem 4.8rem; }
-    header { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
-    h1 { font-size: 1.4rem; }
-    .entry { grid-template-columns: 1fr; gap: 0.4rem; padding: 1.9rem 0; }
-    .when { padding-top: 0; }
-    .years { gap: 0.95rem; }
+    body { padding: 2.4rem 1rem 4.8rem; }
+    .who-name { display: none; }
+    .site-title { font-size: 1.25rem; }
+    .post h1 { font-size: 1.6rem; }
+    .note { font-size: 1.02rem; }
+    .neighbours { grid-template-columns: 1fr; }
+    .neighbours .next { grid-column: 1; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -266,44 +335,56 @@
 
   <header>
     <div>
-      <h1>ဖတ်ဖူးတဲ့ စာအုပ်များ</h1>
-      <p class="subtitle"></p>
+      <p class="site-title"><a href="#/">ဖတ်ဖူးတဲ့ စာအုပ်များ</a></p>
+      <p class="subtitle">စာအုပ်ဖတ်ပြီး တွေးမိတာတွေ</p>
     </div>
     <div class="who">
-      <div class="avatar" id="avatar"><img id="avatarImg" alt="ဟိန်းထက်"></div>
       <span class="who-name">ဟိန်းထက်</span>
+      <div class="avatar" id="avatar"><img id="avatarImg" alt="ဟိန်းထက်"></div>
     </div>
   </header>
 
-  <div class="bar">
-    <span class="count" id="count"></span>
-    <div class="actions">
-      <button class="link" id="theme">Dark</button>
-      <button class="link" id="toggle">ရှာရန်</button>
+  <!-- home: list of posts -->
+  <section id="home">
+    <div class="bar">
+      <span class="count" id="count"></span>
+      <div class="actions">
+        <button class="link theme-btn">Dark</button>
+        <button class="link" id="toggle">ရှာရန်</button>
+      </div>
     </div>
-  </div>
 
-  <div class="years" id="years"></div>
+    <div class="years" id="years"></div>
 
-  <div class="search" id="search">
-    <div class="field"><input type="text" id="qBook" placeholder="စာအုပ်နာမည်"></div>
-    <div class="field"><input type="text" id="qWriter" placeholder="စာရေးသူ"></div>
-    <button class="link" id="clear">ဖျက်</button>
-  </div>
+    <div class="search" id="search">
+      <div class="field"><input type="text" id="qBook" placeholder="စာအုပ်နာမည်"></div>
+      <div class="field"><input type="text" id="qWriter" placeholder="စာရေးသူ"></div>
+      <button class="link" id="clear">ဖျက်</button>
+    </div>
 
-  <div class="list" id="list"><p class="state">ခဏစောင့်ပါ…</p></div>
-  <div id="pages"></div>
+    <div class="list" id="list"><p class="state">ခဏစောင့်ပါ…</p></div>
+    <div id="pages"></div>
+  </section>
+
+  <!-- one post -->
+  <section id="single" hidden>
+    <a class="back" href="#/">← စာအုပ်အားလုံး</a>
+    <article class="post" id="post"></article>
+  </section>
+
+  <footer>ဟိန်းထက် · ဖတ်ဖူးတဲ့ စာအုပ်များ</footer>
 </div>
 
 <script>
   /* ---------- settings ---------- */
   const CSV_URL    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQGqSeOBUkUNLG0seN_cGPtDp9ldSvKasKVdeDCCliwHwVZQWLRQMtRgbOOtJLUFeZZ9dNiS49GlTKK/pub?gid=910367330&single=true&output=csv';
-  const PER_PAGE   = 5;
+  const PER_PAGE   = 10;
   const ONLY_EMAIL = 'mynameisheinhtet@gmail.com';
+  const SITE_TITLE = 'ဖတ်ဖူးတဲ့ စာအုပ်များ';
 
   const PROFILE_SOURCES = ['profile.png'];
 
-  const COL_EMAIL = 1, COL_BOOK = 2, COL_WRITER = 3, COL_TRANS_FROM = 4,
+  const COL_TIME = 0, COL_EMAIL = 1, COL_BOOK = 2, COL_WRITER = 3, COL_TRANS_FROM = 4,
         COL_ORIG_BOOK = 5, COL_ORIG_WRITER = 6, COL_DATE = 9,
         COL_COMMENT = 10, COL_MONTH = 11, COL_YEAR = 12;
 
@@ -333,11 +414,17 @@
 
   function myBreak(s) {
     if (!MY_BREAK_RE || !s) return s;
-    return s.replace(MY_BREAK_RE, '\u200B$1');
+    return s.replace(MY_BREAK_RE, '​$1');
   }
 
   // escape after inserting the break marks, so entities never get split
   function txt(s) { return esc(myBreak(s)); }
+
+  function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
 
   /* ---------- profile picture ---------- */
   (function () {
@@ -345,35 +432,36 @@
     const img = document.getElementById('avatarImg');
     let i = 0;
     img.onerror = () => {
-      console.warn('no profile image at:', img.getAttribute('src'));
       i++;
       if (i < PROFILE_SOURCES.length) img.src = PROFILE_SOURCES[i];
       else box.textContent = 'ဟ';
     };
-    img.onload = () => console.log('profile image loaded from:', img.getAttribute('src'));
     img.src = PROFILE_SOURCES[0];
   })();
 
   /* ---------- theme ---------- */
-  const themeBtn = document.getElementById('theme');
-
-  function paintThemeLabel() {
-    themeBtn.textContent =
-      document.documentElement.dataset.theme === 'dark' ? 'Light' : 'Dark';
+  function paintThemeLabels() {
+    const label = document.documentElement.dataset.theme === 'dark' ? 'Light' : 'Dark';
+    document.querySelectorAll('.theme-btn').forEach(b => { b.textContent = label; });
   }
 
-  themeBtn.addEventListener('click', () => {
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.theme-btn')) return;
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next;
-    try { localStorage.setItem('theme', next); } catch (e) {}
-    paintThemeLabel();
+    try { localStorage.setItem('theme', next); } catch (err) {}
+    paintThemeLabels();
   });
 
-  paintThemeLabel();
+  paintThemeLabels();
 
   /* ---------- state ---------- */
   let allBooks = [], filtered = [], currentPage = 1, activeYear = 'all';
+  let loaded = false, homeScroll = 0;
 
+  const homeEl   = document.getElementById('home');
+  const singleEl = document.getElementById('single');
+  const postEl   = document.getElementById('post');
   const listEl   = document.getElementById('list');
   const pagesEl  = document.getElementById('pages');
   const countEl  = document.getElementById('count');
@@ -421,7 +509,7 @@
 
   function parseDateStr(raw) {
     if (!raw) return null;
-    const str = raw.replace(/[\s\u00A0]+/g, ' ').trim();
+    const str = raw.replace(/[\s ]+/g, ' ').trim();
     if (!str) return null;
     const cleaned = str.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
 
@@ -474,6 +562,25 @@
     return parseDateStr(r[COL_DATE]);
   }
 
+  function whenText(b) {
+    if (!b.year) return '';
+    if (b.mi < 0) return String(b.year);
+    return (b.day ? b.day + ' ' : '') + MONTHS_MY[b.mi] + ' ' + b.year;
+  }
+
+  /* ---------- post links ----------
+     Each post's address comes from the Google Form timestamp
+     ("30/10/2026 17:42:00" -> "20261030-174200"), so links stay the same
+     even if the sheet is re-sorted. Rows without a timestamp fall back to
+     their row number. */
+  function slugFor(r, rowIndex) {
+    const m = (r[COL_TIME] || '').trim()
+      .match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})/);
+    if (!m) return 'r' + (rowIndex + 2);
+    const p = n => String(n).padStart(2, '0');
+    return m[3] + p(m[2]) + p(m[1]) + '-' + p(m[4]) + m[5] + m[6];
+  }
+
   /* ---------- load ---------- */
   async function loadData() {
     try {
@@ -481,13 +588,18 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const rows = parseCSV(await res.text()).slice(1);
 
+      const seen = new Set();
       allBooks = rows.map((r, rowIndex) => {
         const email = (r[COL_EMAIL] || '').trim().toLowerCase();
         const book  = (r[COL_BOOK] || '').trim();
         if (email !== ONLY_EMAIL || !book) return null;
         const dt = getDate(r);
+        let slug = slugFor(r, rowIndex);
+        if (seen.has(slug)) slug = 'r' + (rowIndex + 2);
+        seen.add(slug);
         return {
           rowIndex,
+          slug,
           book,
           writer:     (r[COL_WRITER] || '').trim(),
           transFrom:  (r[COL_TRANS_FROM] || '').trim(),
@@ -508,18 +620,54 @@
         return (b.year - a.year) || (b.mi - a.mi) || (b.day - a.day) || (b.rowIndex - a.rowIndex);
       });
 
+      loaded = true;
+
       if (!allBooks.length) {
         listEl.innerHTML = '<p class="state">စာအုပ်မှတ်တမ်း မရှိသေးပါ</p>';
         return;
       }
 
       renderYears();
-      applyFilters();
+      applyFilters(false);
+      route();
     } catch (err) {
-      listEl.innerHTML = '<p class="state">ဒေတာ ခေါ်မရပါ။ Sheet ကို Publish လုပ်ထားခြင်း ရှိ၊ မရှိ စစ်ပါ။'
+      const msg = '<p class="state">ဒေတာ ခေါ်မရပါ။ Sheet ကို Publish လုပ်ထားခြင်း ရှိ၊ မရှိ စစ်ပါ။'
         + '<small>' + esc(err.message) + '</small></p>';
+      listEl.innerHTML = msg;
+      postEl.innerHTML = msg;
     }
   }
+
+  /* ---------- routing: #/ is the list, #/<slug> is one post ---------- */
+  function currentSlug() {
+    const h = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
+    return h.trim();
+  }
+
+  function route() {
+    const slug = currentSlug();
+
+    if (!slug) {
+      singleEl.hidden = true;
+      homeEl.hidden = false;
+      document.title = SITE_TITLE;
+      window.scrollTo(0, homeScroll);
+      return;
+    }
+
+    homeEl.hidden = true;
+    singleEl.hidden = false;
+    if (!loaded) { postEl.innerHTML = '<p class="state">ခဏစောင့်ပါ…</p>'; return; }
+    renderPost(slug);
+    window.scrollTo(0, 0);
+  }
+
+  window.addEventListener('hashchange', route);
+
+  // remember where we were in the list before opening a post
+  listEl.addEventListener('click', e => {
+    if (e.target.closest('a[href^="#/"]')) homeScroll = window.scrollY;
+  });
 
   /* ---------- year filter ---------- */
   function renderYears() {
@@ -540,7 +688,7 @@
     });
   }
 
-  function applyFilters() {
+  function applyFilters(resetPage = true) {
     const bq = qBook.value.trim().toLowerCase();
     const wq = qWriter.value.trim().toLowerCase();
 
@@ -549,12 +697,18 @@
       (!bq || b.book.toLowerCase().includes(bq)) &&
       (!wq || b.writer.toLowerCase().includes(wq)));
 
-    currentPage = 1;
-    render();
+    if (resetPage) currentPage = 1;
+    renderList();
   }
 
-  /* ---------- render ---------- */
-  function render() {
+  /* ---------- home: list ---------- */
+  function excerptOf(comment) {
+    // first paragraph is enough; CSS trims it to three lines
+    const first = comment.split(/\n\s*\n/)[0].replace(/\s+/g, ' ').trim();
+    return first.length > 600 ? first.slice(0, 600) : first;
+  }
+
+  function renderList() {
     const total = filtered.length;
     const totalPages = Math.ceil(total / PER_PAGE);
     if (currentPage > totalPages) currentPage = totalPages || 1;
@@ -572,29 +726,15 @@
     const page = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
 
     listEl.innerHTML = page.map(b => {
-      const when = b.year
-        ? (b.mi >= 0 ? MONTHS_MY[b.mi] + ' ' + b.year : String(b.year))
-        : '';
-
-      const meta = [];
-      if (b.transFrom)  meta.push(['ဘာသာပြန်', b.transFrom]);
-      if (b.origBook)   meta.push(['မူရင်းစာအုပ်', b.origBook]);
-      if (b.origWriter) meta.push(['မူရင်းစာရေးသူ', b.origWriter]);
-
-      return '<article class="entry">'
-        + `<div class="when">${txt(when)}</div>`
-        + '<div>'
-        +   `<h2 class="title">${txt(b.book)}</h2>`
-        +   (b.writer ? `<p class="writer">${txt(b.writer)}</p>` : '')
-        +   (meta.length
-              ? '<div class="meta">' + meta.map(([l, v]) =>
-                  `<div><b>${txt(l)}</b><span>${txt(v)}</span></div>`).join('') + '</div>'
-              : '')
-        +   (b.comment
-              ? '<div class="note"><div class="note-label">စာအုပ်ဖတ်ပြီးတွေးမိတာ</div>'
-                + txt(b.comment) + '</div>'
-              : '')
-        + '</div></article>';
+      const href = '#/' + encodeURIComponent(b.slug);
+      const when = whenText(b);
+      return '<article class="card">'
+        + (when ? `<div class="card-meta">${txt(when)}</div>` : '')
+        + `<h2><a href="${href}">${txt(b.book)}</a></h2>`
+        + (b.writer ? `<p class="writer">${txt(b.writer)}</p>` : '')
+        + (b.comment ? `<p class="excerpt">${txt(excerptOf(b.comment))}</p>` : '')
+        + (b.comment ? `<a class="more" href="${href}">ဆက်ဖတ်ရန် →</a>` : '')
+        + '</article>';
     }).join('');
 
     renderPages(totalPages);
@@ -606,16 +746,24 @@
     const nums = pageNumbers(currentPage, totalPages).map(p =>
       p === '…'
         ? '<span class="dots">…</span>'
-        : `<button class="page${p === currentPage ? ' on' : ''}" onclick="goPage(${p})">${p}</button>`
+        : `<button class="page${p === currentPage ? ' on' : ''}" data-page="${p}">${p}</button>`
     ).join('');
 
     pagesEl.innerHTML = '<nav class="pages">'
-      + `<button class="page" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>←</button>`
+      + `<button class="page" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>←</button>`
       + nums
-      + `<button class="page" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>→</button>`
+      + `<button class="page" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>→</button>`
       + '</nav>'
       + `<p class="page-note">စာမျက်နှာ ${currentPage} / ${totalPages}</p>`;
   }
+
+  pagesEl.addEventListener('click', e => {
+    const btn = e.target.closest('.page');
+    if (!btn || btn.disabled) return;
+    currentPage = +btn.dataset.page;
+    renderList();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
   function pageNumbers(c, t) {
     if (t <= 7) return Array.from({ length: t }, (_, i) => i + 1);
@@ -627,26 +775,74 @@
     return p;
   }
 
-  function goPage(n) {
-    currentPage = n;
-    render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  qBook.addEventListener('input', applyFilters);
-  qWriter.addEventListener('input', applyFilters);
+  qBook.addEventListener('input', () => applyFilters());
+  qWriter.addEventListener('input', () => applyFilters());
   document.getElementById('clear').addEventListener('click', () => {
     qBook.value = '';
     qWriter.value = '';
     applyFilters();
   });
 
-  function esc(s) {
-    const d = document.createElement('div');
-    d.textContent = s;
-    return d.innerHTML;
+  /* ---------- one post ---------- */
+  function renderPost(slug) {
+    const i = allBooks.findIndex(b => b.slug === slug);
+    if (i < 0) {
+      document.title = SITE_TITLE;
+      postEl.innerHTML = '<p class="state">ဒီစာမျက်နှာ မတွေ့ပါ</p>';
+      return;
+    }
+
+    const b = allBooks[i];
+    const newer = allBooks[i - 1];   // list is newest first
+    const older = allBooks[i + 1];
+    document.title = b.book + ' – ' + SITE_TITLE;
+
+    const meta = [];
+    if (b.transFrom)  meta.push(['ဘာသာပြန်', b.transFrom]);
+    if (b.origBook)   meta.push(['မူရင်းစာအုပ်', b.origBook]);
+    if (b.origWriter) meta.push(['မူရင်းစာရေးသူ', b.origWriter]);
+
+    const when = whenText(b);
+    const neighbour = (x, cls, label) => x
+      ? `<a class="${cls}" href="#/${encodeURIComponent(x.slug)}"><small>${label}</small><span>${txt(x.book)}</span></a>`
+      : '';
+
+    postEl.innerHTML =
+        (when ? `<div class="post-meta">${txt(when)}</div>` : '')
+      + `<h1>${txt(b.book)}</h1>`
+      + (b.writer ? `<p class="writer">${txt(b.writer)}</p>` : '')
+      + (meta.length
+          ? '<div class="meta">' + meta.map(([l, v]) =>
+              `<div><b>${txt(l)}</b><span>${txt(v)}</span></div>`).join('') + '</div>'
+          : '')
+      + (b.comment
+          ? '<div class="note-label">စာအုပ်ဖတ်ပြီးတွေးမိတာ</div>'
+            + `<div class="note">${txt(b.comment)}</div>`
+          : '')
+      + '<div class="post-tools">'
+      +   '<button class="link theme-btn"></button>'
+      +   '<button class="link" id="copyLink">Link ကူးရန်</button>'
+      + '</div>'
+      + '<nav class="neighbours">'
+      +   neighbour(older, 'prev', '← အရင်')
+      +   neighbour(newer, 'next', 'နောက် →')
+      + '</nav>';
+
+    paintThemeLabels();
+
+    document.getElementById('copyLink').addEventListener('click', async e => {
+      const btn = e.currentTarget;
+      try {
+        await navigator.clipboard.writeText(location.href);
+        btn.textContent = 'ကူးပြီးပါပြီ ✓';
+      } catch (err) {
+        btn.textContent = location.href;
+      }
+      setTimeout(() => { btn.textContent = 'Link ကူးရန်'; }, 2000);
+    });
   }
 
+  route();
   loadData();
 </script>
 </body>
