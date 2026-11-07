@@ -580,11 +580,13 @@
       if (m >= 0) return { mi: m, day: +mdy[2], year: +mdy[3] };
     }
 
+    // The sheet writes dates day-first (07/11/2026 = 7 November 2026), like
+    // the form timestamps. Read month-first only when it can't be day-first.
     const slash = cleaned.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
     if (slash) {
       const a = +slash[1], b = +slash[2], year = +slash[3];
-      if (a > 12 && b >= 1 && b <= 12) return { mi: b - 1, day: a, year };
-      if (a >= 1 && a <= 12) return { mi: a - 1, day: b, year };
+      if (a >= 1 && a <= 31 && b >= 1 && b <= 12) return { mi: b - 1, day: a, year };
+      if (a >= 1 && a <= 12 && b >= 1 && b <= 31) return { mi: a - 1, day: b, year };
     }
 
     const iso = cleaned.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
