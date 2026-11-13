@@ -280,6 +280,48 @@
      block without the page feeling gappy */
   .note p + p { margin-top: 1.05em; }
 
+  /* direct quotes from the book */
+  .note .quote {
+    margin: 1.05em 0;
+    padding: 0.75rem 1rem 0.8rem;
+    background: var(--shell);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95rem;
+    line-height: 1.85;
+  }
+  .note .quote + .quote { margin-top: 0.6rem; }
+  .note .quote p { margin: 0; }
+  .note .quote cite {
+    display: block;
+    margin-top: 0.3rem;
+    font-style: normal;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: right;
+  }
+  .note .quote-note {
+    margin-top: -0.4rem;
+    padding-left: 1.2rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .note .quote-head {
+    margin: 2rem 0 0.7rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.01em;
+  }
+  /* the highlight colour used while reading */
+  .note .quote.hl-green  { border-left-color: #7fa86a; }
+  .note .quote.hl-orange { border-left-color: #d4934a; }
+  .note .quote.hl-pink   { border-left-color: #cf7f9a; }
+  .note .quote.hl-yellow { border-left-color: #cdb245; }
+  .note .quote.hl-blue   { border-left-color: #6c94bd; }
+  .note .quote.hl-purple { border-left-color: #9a82bf; }
+  .note .quote.hl-red    { border-left-color: #c46a5e; }
+
   .post-tools {
     display: flex;
     justify-content: flex-end;
@@ -865,6 +907,40 @@
     return out;
   }
 
+  // Review text → HTML. Direct quotes from the book get boxes:
+  //   "## Section"                        → small heading over a group of quotes
+  //   "- quote — *p. 41* _(green)_"       → box, page under it, highlight colour on the edge
+  //   a whole line in "…" (+ optional "(note)" or "(p. 228)") → box, note under it
+  // Everything else is ordinary paragraphs.
+  const QUOTE_COLOURS = ['green', 'orange', 'pink', 'yellow', 'blue', 'purple', 'red'];
+  function quoteBox(text, page, colour, note) {
+    const cls = QUOTE_COLOURS.includes(colour) ? ` hl-${colour}` : '';
+    return `<blockquote class="quote${cls}"><p>${txt(text)}</p>`
+      + (page ? `<cite>${txt(page)}</cite>` : '')
+      + '</blockquote>'
+      + (note ? `<p class="quote-note">${txt(note)}</p>` : '');
+  }
+  function renderNote(text) {
+    const html = [];
+    for (const raw of text.split('\n')) {
+      const line = raw.trim();
+      if (!line) continue;
+      let m;
+      if ((m = line.match(/^#{1,3}\s+(.+)$/))) {
+        html.push(`<h3 class="quote-head">${txt(m[1])}</h3>`);
+      } else if ((m = line.match(/^[-•]\s+(.+?)(?:\s+—\s*\*(pp?\.\s*[^*]+)\*)?(?:\s*_\((\w+)\)_)?$/))) {
+        html.push(quoteBox(m[1], m[2], (m[3] || '').toLowerCase()));
+      } else if ((m = line.match(/^["“](.+)["”]\s*(?:\((.+)\))?$/))) {
+        const extra = m[2] || '';
+        const isPage = /^pp?\.\s*\d/.test(extra);
+        html.push(quoteBox('“' + m[1] + '”', isPage ? extra : '', '', isPage ? '' : extra));
+      } else {
+        html.push(...paragraphsOf(line).map(p => `<p>${txt(p)}</p>`));
+      }
+    }
+    return html.join('');
+  }
+
   /* ---------- home: list ---------- */
   function excerptOf(comment) {
     // first paragraph is enough; CSS trims it to three lines
@@ -993,7 +1069,7 @@
       + (b.comment
           ? '<div class="note-label">စာအုပ်ဖတ်ပြီးတွေးမိတာ</div>'
             + '<div class="note">'
-            +   paragraphsOf(b.comment).map(p => `<p>${txt(p)}</p>`).join('')
+            +   renderNote(b.comment)
             + '</div>'
           : '')
       + '<div class="post-tools">'
